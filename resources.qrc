@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/IMAGES">
+        <file alias="ADD_NEW_ELEMENT">images/AddIcon.png</file>
+        <file alias="PIPE_BUTTON">images/pipeline.png</file>
+        <file alias="SHAFT_BUTTON">images/shaft-hole.png</file>
+        <file alias="CURSOR_PRECISION">images/PrecisionCursor.png</file>
+        <file alias="CURSOR_MOVE_SCENE">images/CursorMove.png</file>
+        <file alias="CURSOR_ROTATE">images/rotate-resized.png</file>
+    </qresource>
+</RCC>
