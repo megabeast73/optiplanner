@@ -21,48 +21,45 @@ public:
     CPipe();
     virtual ~CPipe() override;
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    virtual QRectF boundingRect() const override;
-    virtual QPainterPath shape() const override;
-
-    virtual void AddThis(CAdvGraphicsView * pView) override;
-
-    virtual void paintFirst();
-    virtual void paintSecond();
-
-    virtual void calcPar(QPointF &A, QPointF &B,int offset);
-    virtual void makePathElement();
-
-    virtual void splitAt(QPoint point, CPathElement * newelement) override;
-
-    qreal getLength() const;
-
-    virtual void ShowContexMenu() override;
-
     PipeType getPipeType() const;
     void setPipeType(const PipeType &PipeType);
 
     virtual ElementType elementType() override {return Pipe;}
-    virtual QString elementTypeName() { return "Pipe"; }
+    virtual QString elementTypeName() override { return "Pipe"; }
 
+    virtual ElementProperties *getElementProperties() override;
+    virtual void setElementProperties(ElementProperties * pProp) override;
+
+
+    //Drawing related
+    virtual void preparePainterPath() override;
+    //Draw parrallels of the main path
+    virtual void paintFirst();
+    virtual void paintSecond();
+    //Calcs length of the parrallels depending of their intersections
+    virtual void calcPar(QPointF &A, QPointF &B,int offset);
+
+    //Returns the selection shape, generated within preparePainterPath, paintFirst and paintSectond
+    virtual QPainterPath shape() const override;
+//    virtual bool contains(const QPointF &point) const override;
+
+    //Save & Load
     virtual QJsonObject& getSaveValue() override;
     virtual void LoadElement(const QJsonObject& obj) override;
 
+    virtual bool isConnectionAccepted(CElement *other) override;
+
 protected:
-    virtual void mousePress(QMouseEvent *event) override;
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-
-    virtual void pipeAction(QAction * action);
-
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
+    //Conext menu handlings
+    virtual void configureContextMenu(QMenu *pMenu) override;
+    virtual void contextMenuAction(QAction * pAction) override;
 
 protected:
     qreal m_pipeR;
-    QPainterPath m_PipePath;
-    QPainterPath m_ShapePath;
-    qreal m_Length;
     PipeType m_PipeType;
-
-    QPoint m_MousePos;
+    qreal m_Length;
+    QPainterPath m_Shape;
 
 };
 

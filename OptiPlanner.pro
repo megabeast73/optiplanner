@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    ccenter.cpp \
+    ctextelement.cpp \
         main.cpp \
         mainwindow.cpp \
     cadvgraphicsview.cpp \
@@ -35,9 +37,15 @@ SOURCES += \
     cpathelement.cpp \
     cobjectcollection.cpp \
     globals.cpp \
-    cinfraprop.cpp
+    cinfraprop.cpp \
+    cadvscene.cpp \
+    routefinderdialog.cpp \
+    undocommands.cpp \
+    caxises.cpp
 
 HEADERS += \
+    ccenter.h \
+    ctextelement.h \
         mainwindow.h \
     cadvgraphicsview.h \
     cpipe.h \
@@ -47,11 +55,16 @@ HEADERS += \
     cpathelement.h \
     cobjectcollection.h \
     globals.h \
-    cinfraprop.h
+    cinfraprop.h \
+    cadvscene.h \
+    routefinderdialog.h \
+    undocommands.h \
+    caxises.h
 
 FORMS += \
         mainwindow.ui \
-    cinfraprop.ui
+    cinfraprop.ui \
+    routefinderdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -60,3 +73,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES +=

@@ -19,47 +19,28 @@ public:
     };
 
     CShaft();
-    virtual ~CShaft();
+    virtual ~CShaft() override;
 
     void setShaftType(const ShaftType &ShaftType);
     ShaftType shaftType() { return  m_ShaftType; }
+    virtual QString elementTypeName() override { return "Shaft"; }
 
-    //Pure virtuals
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    virtual void AddThis(CAdvGraphicsView * pView) override;
-    virtual QRectF boundingRect() const override;
-
-    virtual void ShowContexMenu() override;
-
-    virtual ElementType elementType() override {return Shaft;}
-    virtual QString elementTypeName() { return "Shaft"; }
-
+    virtual void definePainterPath();
+    //Related to Save, Load and Undo
     virtual QJsonObject& getSaveValue() override;
     virtual void LoadElement(const QJsonObject& obj) override;
 
-    virtual ElementProperties * getElementProperties() override;
+    virtual bool isConnectionAccepted(CElement *other) override;
+
+    virtual ElementProperties *getElementProperties() override;
     virtual void setElementProperties(ElementProperties * pProp) override;
 
 protected:
-    //Theese are when adding the element
-    virtual void mousePress(QMouseEvent *event) override;
-    virtual void mouseRelease(QMouseEvent *event) override;
-    virtual void mouseMove(QMouseEvent *event) override;
-
-    //slots
-    void actionShaftType(QAction * action);
-
-
-
-
-
-
+    virtual void configureContextMenu(QMenu *pMenu) override;
+    virtual void contextMenuAction(QAction * pAction) override;
 
 protected:
     ShaftType m_ShaftType;
-    QRectF m_BoundingRect;
-
-    QPen m_MiddlePen;
 
 
 };

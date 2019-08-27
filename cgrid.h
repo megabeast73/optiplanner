@@ -9,20 +9,29 @@ class CGrid : public CElement
 {
 public:
     CGrid();
+    ~CGrid() override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     virtual QRectF boundingRect() const override;
+
     qreal GetZoomPixelSize();
     void DrawVisibleGrid(QPainter * painter,const QStyleOptionGraphicsItem *option);
 
-    virtual ElementType elementType() override { return StaticElement;}
+    void SetSceneSize(const QRectF &rect);
+
+    const QColor getGridColor();
+    void setGridColor(const QColor &c);
+
+    const QColor getScaleColor();
+    void setScaleColor(const QColor &c);
 
 protected:
-    QVector<qreal> m_Dashes;
+
     QPen m_penGrid;
     QPen m_penScaleText;
     QPen m_penBorder;
-    bool m_addedtoscene;
-    qreal m_stopx,m_stopy;
+
+    QRectF m_SceneSize;
+
 };
 
 #endif // CGRID_H

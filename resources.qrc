@@ -6,5 +6,13 @@
         <file alias="CURSOR_PRECISION">images/PrecisionCursor.png</file>
         <file alias="CURSOR_MOVE_SCENE">images/CursorMove.png</file>
         <file alias="CURSOR_ROTATE">images/rotate-resized.png</file>
+        <file alias="CHAIN_ICON">images/chain.jpg</file>
+        <file alias="WIRING_ICON">images/wiring.png</file>
+        <file alias="INFRA_DIAGRAM">images/infra_diagram.png</file>
+        <file alias="TARGET_ITEM">images/icons8-collect-24.png</file>
+        <file alias="CONTROL_CENTER_ICON">images/CC_Toolbar.png</file>
+        <file alias="ADD_LINK">images/Add_Link.png</file>
+        <file alias="REMOVE_LINK">images/Remove_Link.png</file>
+        <file alias="EDIT_LINK">images/Edit-Link.png</file>
     </qresource>
 </RCC>

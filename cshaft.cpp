@@ -4,6 +4,10 @@
 #include <qgraphicsscene.h>
 #include <qmenu.h>
 #include <qcombobox.h>
+#include "undocommands.h"
+#include "globals.h"
+#include "cpipe.h"
+
 
 
 #define SINGLE_SHAFT_WIDTH 90
@@ -26,21 +30,19 @@
 CShaft::CShaft() : CElement ()
 {
     setShaftType(SingleShaft);
+    m_ElementType = Shaft;
     m_BoundingRect.setX(0);
     m_BoundingRect.setY(0);
 
     m_NormalPen.setColor(Qt::white);
     m_NormalPen.setBrush(QBrush(Qt::white,Qt::SolidPattern));
     m_NormalPen.setStyle(Qt::SolidLine);
-    m_NormalPen.setWidth(5);
+    m_NormalPen.setWidth(3);
 
     m_SelectedPen.setColor(Qt::yellow);
     m_SelectedPen.setBrush(QBrush(Qt::yellow,Qt::SolidPattern));//Dense4Pattern));
     m_SelectedPen.setStyle(Qt::DashLine);
-    m_SelectedPen.setWidth(5);
-
-    m_MiddlePen = m_NormalPen;
-    m_MiddlePen.setWidth(2);
+    m_SelectedPen.setWidth(3);
 }
 CShaft::~CShaft ()
 {
@@ -52,6 +54,7 @@ void CShaft::setShaftType(const ShaftType &ShaftType)
 {
     QString Tip("Shaft/Pit \n Type: ");
 
+    prepareGeometryChange();
     m_ShaftType = ShaftType;
 
     switch (ShaftType) {
@@ -77,140 +80,94 @@ void CShaft::setShaftType(const ShaftType &ShaftType)
     Tip.append("x");
     Tip.append(QString::number(m_BoundingRect.height(),'f',2));
     setToolTip(Tip);
-
+    definePainterPath();
 }
 
-void CShaft::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
+ void CShaft::definePainterPath()
+ {
+
+     QPoint  center;
+     m_PainterPath = QPainterPath();
 
 
-    CElement::paint(painter,option,widget);
+     m_PainterPath.addRect(m_BoundingRect);
+     m_PainterPath.moveTo(2,2);
 
-    QPoint  center;
-
-    painter->drawRect(m_BoundingRect);
-    painter->setPen(m_MiddlePen);
-    switch (m_ShaftType)
-    {
-    case SingleShaft:
-        painter->drawLine(4,4,SINGLE_SHAFT_WIDTH -4,SINGLE_SHAFT_HEIGHT -4);
-        painter->drawLine(SINGLE_SHAFT_WIDTH-4,4,4,SINGLE_SHAFT_HEIGHT-4);
+     switch (m_ShaftType)
+     {
+     case SingleShaft:
+        m_PainterPath.lineTo(SINGLE_SHAFT_WIDTH-2,SINGLE_SHAFT_HEIGHT-2);
+        m_PainterPath.moveTo(2,SINGLE_SHAFT_HEIGHT-2);
+        m_PainterPath.lineTo(SINGLE_SHAFT_WIDTH-2,2);
         break;
-    case DoubleShaft:
-            painter->drawLine(4,DOUBLE_SHAFT_HEIGHT/2 -2,DOUBLE_SHAFT_WIDHT -4,DOUBLE_SHAFT_HEIGHT/2 -2);
+     case DoubleShaft:
+        m_PainterPath.lineTo(DOUBLE_SHAFT_WIDHT -2,DOUBLE_SHAFT_HEIGHT/2 -1); // \
 
-            painter->drawLine(4,4,DOUBLE_SHAFT_WIDHT -4,DOUBLE_SHAFT_HEIGHT/2 -2);
-            painter->drawLine(4,DOUBLE_SHAFT_HEIGHT/2 -2, DOUBLE_SHAFT_WIDHT -4,4);
+        m_PainterPath.moveTo(DOUBLE_SHAFT_WIDHT-2,DOUBLE_SHAFT_HEIGHT/2);
+        m_PainterPath.lineTo(4,DOUBLE_SHAFT_HEIGHT/2); // -
 
-            painter->drawLine(4,DOUBLE_SHAFT_HEIGHT/2+2,DOUBLE_SHAFT_WIDHT-4,DOUBLE_SHAFT_HEIGHT-4);
-            painter->drawLine(4,DOUBLE_SHAFT_HEIGHT-4,DOUBLE_SHAFT_WIDHT-4,DOUBLE_SHAFT_HEIGHT/2+2);
+        m_PainterPath.moveTo(4,DOUBLE_SHAFT_HEIGHT/2+2);
+        m_PainterPath.lineTo(DOUBLE_SHAFT_WIDHT-2,DOUBLE_SHAFT_HEIGHT-2); // \
 
+        m_PainterPath.moveTo(4,DOUBLE_SHAFT_HEIGHT-1);
+        m_PainterPath.lineTo(DOUBLE_SHAFT_WIDHT-2,DOUBLE_SHAFT_HEIGHT/2-1); // /
 
-        break;
-    case RoundedShaft:
-        center = m_BoundingRect.center().toPoint();
-        painter->drawEllipse(center,ROUNDED_SHAFT_HEIGHT /4,ROUNDED_SHAFT_WIDTH /4);
-        painter->drawEllipse(center,5,5);
+        m_PainterPath.moveTo(4,DOUBLE_SHAFT_HEIGHT/2-2);
+        m_PainterPath.lineTo(DOUBLE_SHAFT_WIDHT-2,2); // /
+         break;
+     case RoundedShaft:
+         center = m_BoundingRect.center().toPoint();
+         m_PainterPath.addEllipse(center,ROUNDED_SHAFT_HEIGHT /4,ROUNDED_SHAFT_WIDTH /4);
+         m_PainterPath.addEllipse(center,5,5);
+         break;
+     }
+ }
 
-        break;
-    }
-
-
-}
-void CShaft::AddThis(CAdvGraphicsView * pView)
-{
-    CElement::AddThis(pView);
-
-    pView->setMouseTracking(true);
-    pView->setCursorShape(CAdvGraphicsView::Precision);
-
-}
-
-
-
-void CShaft::mousePress(QMouseEvent *event)
+void CShaft::configureContextMenu(QMenu *pMenu)
 {
 
-}
-
-void CShaft::mouseRelease(QMouseEvent *event)
-{
-    QPointF pos;
-    Qt::MouseButtons b = event->buttons();
-    if (b == Qt::RightButton)
-    {
-        disconnectSignals();
-        m_pView->cursor().setShape(Qt::ArrowCursor);
-        m_Dirty = true;
-    }
-    if (event->button() == Qt::LeftButton)
-    {
-        disconnectSignals();
-        m_pView->setCursorShape(CAdvGraphicsView::Arrow);
-
-        m_Dirty = false;
-        m_pView->scene()->addItem(this);
-        pos = m_pView->mapToScene(event->pos());
-        pos.setX(pos.x() - m_BoundingRect.width() /2);
-        pos.setY(pos.y() - m_BoundingRect.height() /2);
-        setPos(pos);
-    }
-}
-
-void CShaft::mouseMove(QMouseEvent *event)
-{
-}
-
-
-
-QRectF CShaft::boundingRect() const
-{
-    QRectF ret (m_BoundingRect);
-    ret.setX(ret.x()-1);
-    ret.setY(ret.y()-1);
-    ret.setWidth(ret.width() +2);
-     ret.setHeight(ret.height() +2);
-    return ret;
-}
-
-void CShaft::ShowContexMenu()
-{
-    if (m_Dirty)
-        return;
-    setSelected(true);
-
-    QMenu * pMenu = new QMenu("Shaft");
 
     QMenu * pSub = pMenu->addMenu("Shaft type");
     pSub->addAction(SINGLE_NAME)->setData(QVariant(1));
     pSub->addAction(DOUBLE_NAME)->setData(QVariant(2));
     pSub->addAction(ROUNDED_NAME)->setData(QVariant(3));
     pMenu->addAction("Properties...")->setData(QVariant(4));
+    pMenu->addSeparator();
+    CElement::configureContextMenu(pMenu);
 
-    actionShaftType(pMenu->exec(QCursor::pos()));
-    delete pMenu;
+
+
 }
 
-void CShaft::actionShaftType(QAction * action)
+void CShaft::contextMenuAction(QAction * pAction)
 {
-    if (!action)
+    if (!pAction)
         return;
-    switch (action->data().toInt()) {
-        case 1:
-            setShaftType(SingleShaft);
+    CUndoPropChange *pUndo = new CUndoPropChange(scene()->selectedItems());
+    pUndo->setText("Change shaft type");
+    int ix = pAction->data().toInt();
+    switch (ix)
+    {
+    case 1 :
+        setShaftType(SingleShaft);
+        pUndo->finishPropChange();
+        g_UndoStack->push(pUndo);
         break;
-        case 2:
-            setShaftType(DoubleShaft);
+    case 2:
+        setShaftType(DoubleShaft);
+        pUndo->finishPropChange();
+        g_UndoStack->push(pUndo);
         break;
-        case 3:
-            setShaftType(RoundedShaft);
+    case 3:
+        setShaftType(RoundedShaft);
+        pUndo->finishPropChange();
+        g_UndoStack->push(pUndo);
         break;
 
     }
-    prepareGeometryChange();
-    update();
-}
+    CElement::contextMenuAction(pAction);
 
+}
 QJsonObject& CShaft::getSaveValue()
 {
     CElement::getSaveValue();
@@ -223,6 +180,22 @@ QJsonObject& CShaft::getSaveValue()
     setShaftType((ShaftType) obj["shaft_tp"].toInt());
 
 }
+bool CShaft::isConnectionAccepted(CElement *other)
+{
+    if (other->elementType() == Pipe)
+    {
+        CPipe * pOther = (CPipe *) other;
+        QRectF rectSelf = mapToScene(m_BoundingRect).boundingRect();
+        CPathPoint * pPath = pOther->path();
+        QPointF pipePoint = pOther->mapToScene(pPath->point);
+        if (rectSelf.contains(pipePoint)) //Check the start of the pipe
+            return true;
+        pipePoint = pOther->mapToScene(pPath->GetLast()->point);
+        return rectSelf.contains(pipePoint); //Check the end of the pipe
+    }
+    return false;
+}
+
 
  ElementProperties * CShaft::getElementProperties()
  {
@@ -246,5 +219,10 @@ QJsonObject& CShaft::getSaveValue()
 
  void CShaft::setElementProperties(ElementProperties * pProp)
  {
-     CElement::setElementProperties(pProp);
+
+    int tp = dynamic_cast<QComboBox *>(pProp->byName("Shaft type")->pEditor)->currentIndex();
+    setShaftType((ShaftType) tp);
+    definePainterPath();
+    CElement::setElementProperties(pProp); //Call base class member. This will calls prepareGeometryChange and Update
  }
+
